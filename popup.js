@@ -1,13 +1,8 @@
 // Tab Reaper - Popup UI
-// Reads toggle/delay state from chrome.storage.sync and writes changes back.
+// Reads delay state from chrome.storage.sync and writes changes back.
 // Manages custom URL patterns and displays recent closure log.
 
-const TOGGLES = ["oauthCallback", "slackRedirect", "zoomLauncher"];
-
 const DEFAULT_STATE = {
-  oauthCallback: true,
-  slackRedirect: true,
-  zoomLauncher: true,
   delayMs: 2000,
   customPatterns: []
 };
@@ -26,9 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Load saved state and apply to UI ---
 
   chrome.storage.sync.get(DEFAULT_STATE, (state) => {
-    for (const id of TOGGLES) {
-      document.getElementById(id).checked = state[id];
-    }
     delaySlider.value = state.delayMs;
     delayLabel.textContent = formatDelay(state.delayMs);
     renderCustomPatterns(state.customPatterns || []);
@@ -39,14 +31,6 @@ document.addEventListener("DOMContentLoaded", () => {
   chrome.storage.local.get({ recentClosures: [] }, (result) => {
     renderRecentClosures(result.recentClosures);
   });
-
-  // --- Toggle change handlers ---
-
-  for (const id of TOGGLES) {
-    document.getElementById(id).addEventListener("change", (e) => {
-      chrome.storage.sync.set({ [id]: e.target.checked });
-    });
-  }
 
   // --- Delay slider handler ---
 

@@ -1,74 +1,7 @@
 // Tab Reaper - Background Service Worker
-// Listens for tab URL changes and closes tabs matching configured patterns.
-
-const PATTERNS = {
-  oauthCallback: {
-    id: "oauthCallback",
-    label: "OAuth callbacks on localhost",
-    test: (url) => {
-      try {
-        const u = new URL(url);
-        return u.hostname === "127.0.0.1" && u.pathname.includes("/oauth/callback");
-      } catch {
-        return false;
-      }
-    }
-  },
-  slackRedirect: {
-    id: "slackRedirect",
-    label: "Slack app redirects",
-    test: (url) => {
-      try {
-        const u = new URL(url);
-        if (u.hostname === "app.slack.com" && u.pathname.startsWith("/client")) {
-          return true;
-        }
-        // Slack launcher pages that hand off to the native app.
-        // These often contain ssb_redirect or app_redirect parameters,
-        // or show "Open Slack" interstitial pages.
-        if (u.hostname === "app.slack.com" || u.hostname === "slack.com") {
-          const params = u.searchParams;
-          if (
-            params.has("ssb_redirect") ||
-            params.has("app_redirect") ||
-            u.pathname.includes("/app-redirect") ||
-            u.pathname.includes("/ssb/redirect")
-          ) {
-            return true;
-          }
-        }
-        // slack:// protocol URLs that somehow end up in a tab
-        if (url.startsWith("slack://")) {
-          return true;
-        }
-        return false;
-      } catch {
-        return false;
-      }
-    }
-  },
-  zoomLauncher: {
-    id: "zoomLauncher",
-    label: "Zoom meeting launcher tabs",
-    test: (url) => {
-      try {
-        const u = new URL(url);
-        if (!u.hostname.endsWith("zoom.us")) {
-          return false;
-        }
-        // Match /j/meetingid (join) and /wc/meetingid (web client launcher)
-        return /^\/(j|wc)\//.test(u.pathname);
-      } catch {
-        return false;
-      }
-    }
-  }
-};
+// Listens for tab URL changes and closes tabs matching user-defined patterns.
 
 const DEFAULT_STATE = {
-  oauthCallback: true,
-  slackRedirect: true,
-  zoomLauncher: true,
   delayMs: 2000,
   customPatterns: []
 };
@@ -159,8 +92,7 @@ function incrementBadge() {
 
 // --- Core listener ---
 
-// Evaluate every tab URL update against active built-in patterns
-// and user-defined custom substring patterns.
+// Evaluate every tab URL update against user-defined substring patterns.
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   // Only act when the URL actually changes (not on every status flip).
   if (!changeInfo.url) {
@@ -174,22 +106,11 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     return;
   }
 
-  // Check built-in patterns first.
-  for (const pattern of Object.values(PATTERNS)) {
-    if (!currentState[pattern.id]) {
-      continue;
-    }
-    if (pattern.test(url)) {
-      scheduleClose(tabId, currentState.delayMs, pattern.label, url);
-      return;
-    }
-  }
-
-  // Check custom substring patterns.
+  // Check user-defined substring patterns.
   const customs = currentState.customPatterns || [];
   for (const substring of customs) {
     if (url.includes(substring)) {
-      scheduleClose(tabId, currentState.delayMs, "custom: " + substring, url);
+      scheduleClose(tabId, currentState.delayMs, substring, url);
       return;
     }
   }
