@@ -19,12 +19,14 @@
 
     <div class="custom-patterns-section">
       <h2>Patterns</h2>
-      <p class="section-hint">Substring match against tab URLs</p>
+      <p class="section-hint">Substring match against tab URLs on sites you approve</p>
       <ul id="customPatternList"></ul>
       <div class="custom-pattern-input">
         <input type="text" id="customPatternText" placeholder="e.g. pagerduty.slack.com/client">
         <button id="addPatternBtn">Add</button>
       </div>
+      <p class="permission-hint">Adding a pattern prompts for access to that site's tabs. Enter a hostname or full URL so Tab Reaper can request the right site permission.</p>
+      <p class="message" id="message" hidden></p>
     </div>
 
     <div class="recent-closures-section">

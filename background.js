@@ -16,7 +16,10 @@ let closedCount = 0;
 // Load persisted state on startup and keep cache in sync.
 function loadState() {
   chrome.storage.sync.get(DEFAULT_STATE, (result) => {
-    currentState = result;
+    currentState = {
+      ...result,
+      customPatterns: normalizePatterns(result.customPatterns)
+    };
   });
   // Restore badge counter from local storage.
   chrome.storage.local.get({ closedCount: 0 }, (result) => {
@@ -28,7 +31,9 @@ function loadState() {
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "sync") {
     for (const [key, { newValue }] of Object.entries(changes)) {
-      currentState[key] = newValue;
+      currentState[key] = key === "customPatterns"
+        ? normalizePatterns(newValue)
+        : newValue;
     }
   }
   if (area === "local" && changes.closedCount) {
@@ -108,13 +113,39 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
   // Check user-defined substring patterns.
   const customs = currentState.customPatterns || [];
-  for (const substring of customs) {
-    if (url.includes(substring)) {
-      scheduleClose(tabId, currentState.delayMs, substring, url);
+  for (const entry of customs) {
+    if (url.includes(entry.match)) {
+      scheduleClose(tabId, currentState.delayMs, entry.match, url);
       return;
     }
   }
 });
+
+function normalizePatterns(patterns) {
+  if (!Array.isArray(patterns)) {
+    return [];
+  }
+
+  return patterns
+    .map((entry) => {
+      if (typeof entry === "string") {
+        return {
+          match: entry,
+          origins: []
+        };
+      }
+
+      if (!entry || typeof entry.match !== "string") {
+        return null;
+      }
+
+      return {
+        match: entry.match,
+        origins: Array.isArray(entry.origins) ? entry.origins : []
+      };
+    })
+    .filter(Boolean);
+}
 
 function scheduleClose(tabId, delayMs, reason, url) {
   setTimeout(() => {

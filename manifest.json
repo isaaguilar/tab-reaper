@@ -1,14 +1,16 @@
 {
   "manifest_version": 3,
   "name": "Tab Reaper",
-  "version": "1.0.0",
-  "description": "Automatically closes leftover browser tabs matching user-defined URL patterns.",
+  "version": "1.0.1",
+  "description": "Automatically closes leftover browser tabs matching user-defined URL patterns on sites you grant access to.",
   "permissions": [
     "tabs",
-    "storage"
+    "storage",
+    "permissions"
   ],
-  "host_permissions": [
-    "<all_urls>"
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -16,10 +18,14 @@
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "128": "icon128.svg"
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
     }
   },
   "icons": {
-    "128": "icon128.svg"
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
   }
 }

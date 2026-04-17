@@ -1,6 +1,6 @@
 // Tab Reaper - Popup UI
 // Reads delay state from chrome.storage.sync and writes changes back.
-// Manages custom URL patterns and displays recent closure log.
+// Manages custom URL patterns, requests site access, and displays recent closure log.
 
 const DEFAULT_STATE = {
   delayMs: 2000,
@@ -21,9 +21,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Load saved state and apply to UI ---
 
   chrome.storage.sync.get(DEFAULT_STATE, (state) => {
+    const patterns = normalizePatterns(state.customPatterns);
     delaySlider.value = state.delayMs;
     delayLabel.textContent = formatDelay(state.delayMs);
-    renderCustomPatterns(state.customPatterns || []);
+    renderCustomPatterns(patterns);
   });
 
   // --- Load recent closures from local storage ---
@@ -55,29 +56,64 @@ document.addEventListener("DOMContentLoaded", () => {
   function addCustomPattern() {
     const value = patternInput.value.trim();
     if (!value) {
+      showMessage("Enter a hostname or full URL pattern first.", "error");
       return;
     }
+
+    const entry = buildPatternEntry(value);
+    if (!entry) {
+      showMessage("Use a hostname or full http/https URL so Tab Reaper can request access for the right site.", "error");
+      return;
+    }
+
     chrome.storage.sync.get({ customPatterns: [] }, (result) => {
-      const patterns = result.customPatterns;
-      // Avoid duplicates.
-      if (patterns.includes(value)) {
+      const patterns = normalizePatterns(result.customPatterns);
+      if (patterns.some((pattern) => pattern.match === entry.match)) {
         patternInput.value = "";
+        showMessage("That pattern already exists.", "error");
         return;
       }
-      patterns.push(value);
-      chrome.storage.sync.set({ customPatterns: patterns }, () => {
-        patternInput.value = "";
-        renderCustomPatterns(patterns);
+
+      chrome.permissions.request({ origins: entry.origins }, (granted) => {
+        if (chrome.runtime.lastError) {
+          showMessage(chrome.runtime.lastError.message, "error");
+          return;
+        }
+
+        if (!granted) {
+          showMessage("Site access was not granted, so the pattern was not added.", "error");
+          return;
+        }
+
+        patterns.push(entry);
+        chrome.storage.sync.set({ customPatterns: patterns }, () => {
+          patternInput.value = "";
+          renderCustomPatterns(patterns);
+          showMessage("Pattern added and site access granted.", "success");
+        });
       });
     });
   }
 
   function removeCustomPattern(index) {
     chrome.storage.sync.get({ customPatterns: [] }, (result) => {
-      const patterns = result.customPatterns;
-      patterns.splice(index, 1);
+      const patterns = normalizePatterns(result.customPatterns);
+      const [removed] = patterns.splice(index, 1);
+      const unusedOrigins = (removed?.origins || []).filter((origin) => {
+        return !patterns.some((pattern) => pattern.origins.includes(origin));
+      });
+
       chrome.storage.sync.set({ customPatterns: patterns }, () => {
+        if (unusedOrigins.length > 0) {
+          chrome.permissions.remove({ origins: unusedOrigins }, () => {
+            renderCustomPatterns(patterns);
+            showMessage("Pattern removed.", "success");
+          });
+          return;
+        }
+
         renderCustomPatterns(patterns);
+        showMessage("Pattern removed.", "success");
       });
     });
   }
@@ -87,8 +123,25 @@ document.addEventListener("DOMContentLoaded", () => {
     patterns.forEach((pattern, i) => {
       const li = document.createElement("li");
 
-      const text = document.createElement("span");
-      text.textContent = pattern;
+      const text = document.createElement("div");
+      text.className = "pattern-text";
+
+      const match = document.createElement("span");
+      match.className = "pattern-match";
+      match.textContent = pattern.match;
+      text.appendChild(match);
+
+      if (pattern.origins.length > 0) {
+        const origins = document.createElement("span");
+        origins.className = "pattern-origins";
+        origins.textContent = pattern.origins.join(", ");
+        text.appendChild(origins);
+      } else {
+        const origins = document.createElement("span");
+        origins.className = "pattern-origins";
+        origins.textContent = "Legacy pattern, remove and re-add to grant site access.";
+        text.appendChild(origins);
+      }
 
       const btn = document.createElement("button");
       btn.className = "delete-pattern";
@@ -163,4 +216,123 @@ function formatTime(timestamp) {
 function appendBypass(url) {
   const separator = url.includes("?") ? "&" : "?";
   return url + separator + "tab_reaper=bypass";
+}
+
+function normalizePatterns(patterns) {
+  if (!Array.isArray(patterns)) {
+    return [];
+  }
+
+  return patterns
+    .map((entry) => {
+      if (typeof entry === "string") {
+        return {
+          match: entry,
+          origins: []
+        };
+      }
+
+      if (!entry || typeof entry.match !== "string") {
+        return null;
+      }
+
+      return {
+        match: entry.match,
+        origins: Array.isArray(entry.origins) ? entry.origins : []
+      };
+    })
+    .filter(Boolean);
+}
+
+function buildPatternEntry(value) {
+  const origins = deriveOrigins(value);
+  if (!origins) {
+    return null;
+  }
+
+  return {
+    match: value,
+    origins
+  };
+}
+
+function deriveOrigins(value) {
+  if (value.startsWith("http://") || value.startsWith("https://")) {
+    try {
+      const parsed = new URL(value);
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+        return null;
+      }
+
+      return buildOriginPatterns(parsed.host, [parsed.protocol]);
+    } catch {
+      return null;
+    }
+  }
+
+  const host = value.split(/[/?#]/, 1)[0];
+  if (!isValidHost(host)) {
+    return null;
+  }
+
+  return buildOriginPatterns(host, ["http:", "https:"]);
+}
+
+function isValidHost(host) {
+  if (!host) {
+    return false;
+  }
+
+  const bareHost = host.replace(/:\d+$/, "");
+  if (bareHost === "localhost") {
+    return true;
+  }
+
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(bareHost)) {
+    return true;
+  }
+
+  if (bareHost.startsWith("*.")) {
+    return /^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/.test(bareHost.slice(2));
+  }
+
+  return /^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/.test(bareHost);
+}
+
+function buildOriginPatterns(host, protocols) {
+  const origins = [];
+  const bareHost = host.replace(/:\d+$/, "");
+  const canUseWildcard = !bareHost.startsWith("*.") &&
+    bareHost !== "localhost" &&
+    !/^\d{1,3}(\.\d{1,3}){3}$/.test(bareHost) &&
+    bareHost.includes(".") &&
+    !host.includes(":");
+
+  for (const protocol of protocols) {
+    origins.push(`${protocol}//${host}/*`);
+    if (bareHost.startsWith("*.")) {
+      origins.push(`${protocol}//${bareHost}/*`);
+      continue;
+    }
+
+    if (canUseWildcard) {
+      origins.push(`${protocol}//*.${bareHost}/*`);
+    }
+  }
+
+  return [...new Set(origins)];
+}
+
+function showMessage(text, type) {
+  const message = document.getElementById("message");
+  if (!text) {
+    message.hidden = true;
+    message.textContent = "";
+    message.className = "message";
+    return;
+  }
+
+  message.hidden = false;
+  message.textContent = text;
+  message.className = "message " + type;
 }

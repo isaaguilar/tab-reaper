@@ -1,10 +1,10 @@
 # Privacy Policy for Tab Reaper
 
-Tab Reaper is a Chrome extension that automatically closes leftover browser tabs from OAuth callbacks, Slack redirects, Zoom meeting launchers, and user-defined custom URL patterns.
+Tab Reaper is a Chrome extension that automatically closes leftover browser tabs matching user-defined URL patterns on sites the user explicitly grants access to.
 
 ## What Tab Reaper accesses
 
-Tab Reaper reads tab URLs on the hosts listed in its manifest so it can detect tabs that match its configured auto-close patterns.
+Tab Reaper reads tab URLs only on sites the user explicitly approves when adding a pattern so it can detect tabs that match its configured auto-close patterns.
 
 Tab Reaper stores extension settings in `chrome.storage.sync`, including which built-in patterns are enabled, the configured close delay, and any custom substring patterns you add.
 
