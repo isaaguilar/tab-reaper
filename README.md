@@ -37,3 +37,7 @@ You can also add custom substring patterns for any other leftover tab URLs you w
 - **tabs** -- Required to read tab URLs and close tabs.
 - **storage** -- Required to persist toggle state and delay across sessions via `chrome.storage.sync`.
 - **host_permissions** -- Scoped to `127.0.0.1`, `app.slack.com`, `slack.com`, and `*.zoom.us` so the extension only sees URLs it needs to match.
+
+## Privacy
+
+See [PRIVACY.md](PRIVACY.md) for the extension's privacy policy.
