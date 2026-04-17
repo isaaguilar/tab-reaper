@@ -14,6 +14,8 @@ Many tools open a browser tab as part of their flow (SSO login, "Open in Slack",
 
 Each pattern can be toggled on or off independently. The close delay is configurable from 0.5 to 5 seconds (default 2 seconds) to give the underlying request time to finish before the tab disappears.
 
+You can also add custom substring patterns for any other leftover tab URLs you want Tab Reaper to clean up, and the popup shows a recent history of closed tabs plus a badge counter for the current browser session.
+
 ## Installation
 
 1. Clone or download this directory.
@@ -27,10 +29,11 @@ Each pattern can be toggled on or off independently. The close delay is configur
 - `manifest.json` -- Manifest V3 extension metadata, permissions, and service worker registration.
 - `background.js` -- Service worker that listens on `chrome.tabs.onUpdated` and closes matching tabs after a delay.
 - `popup.html` / `popup.js` / `popup.css` -- Popup UI for toggling patterns and adjusting the delay.
-- `icon128.svg` -- Extension icon (scythe with tab-close marks on a dark background).
+- `icon16.png` / `icon48.png` / `icon128.png` -- Packaged extension icons used by Chrome and the Chrome Web Store.
+- `icon128.svg` -- Source artwork for the extension icon.
 
 ## Permissions
 
 - **tabs** -- Required to read tab URLs and close tabs.
 - **storage** -- Required to persist toggle state and delay across sessions via `chrome.storage.sync`.
-- **host_permissions** -- Scoped to `127.0.0.1`, `app.slack.com`, and `*.zoom.us` so the extension only sees URLs it needs to match.
+- **host_permissions** -- Scoped to `127.0.0.1`, `app.slack.com`, `slack.com`, and `*.zoom.us` so the extension only sees URLs it needs to match.
