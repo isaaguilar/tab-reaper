@@ -1,0 +1,317 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  width: 320px;
+}
+
+.container {
+  padding: 16px;
+}
+
+h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #f5f5f5;
+  margin-bottom: 2px;
+}
+
+h2 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ccc;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 16px;
+}
+
+.section-hint {
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+/* --- Pattern toggle rows --- */
+
+.patterns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.pattern-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #16213e;
+  transition: background 0.15s;
+}
+
+.pattern-row:hover {
+  background: #1a2744;
+}
+
+/* Hide native checkbox */
+.pattern-row input[type="checkbox"] {
+  display: none;
+}
+
+/* Custom toggle switch */
+.toggle {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+  background: #333;
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+.toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: #888;
+  border-radius: 50%;
+  transition: transform 0.2s, background 0.2s;
+}
+
+input[type="checkbox"]:checked + .toggle {
+  background: #0f3460;
+}
+
+input[type="checkbox"]:checked + .toggle::after {
+  transform: translateX(16px);
+  background: #53d769;
+}
+
+.pattern-label {
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.pattern-label code {
+  font-size: 11px;
+  color: #7a8bb5;
+  background: #0d1b33;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+/* --- Delay slider --- */
+
+.delay-section {
+  padding: 10px;
+  background: #16213e;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.delay-section label {
+  font-size: 12px;
+  color: #999;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.delay-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+input[type="range"] {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: #333;
+  border-radius: 2px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #53d769;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+#delayValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: #53d769;
+  min-width: 32px;
+  text-align: right;
+}
+
+/* --- Custom patterns section --- */
+
+.custom-patterns-section {
+  padding: 10px;
+  background: #16213e;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+#customPatternList {
+  list-style: none;
+  margin-bottom: 8px;
+}
+
+#customPatternList:empty {
+  margin-bottom: 0;
+}
+
+#customPatternList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  margin-bottom: 4px;
+  background: #0d1b33;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #b0b8cc;
+  word-break: break-all;
+}
+
+#customPatternList li .delete-pattern {
+  flex-shrink: 0;
+  margin-left: 8px;
+  background: none;
+  border: none;
+  color: #775;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+#customPatternList li .delete-pattern:hover {
+  color: #e55;
+}
+
+.custom-pattern-input {
+  display: flex;
+  gap: 6px;
+}
+
+.custom-pattern-input input[type="text"] {
+  flex: 1;
+  padding: 5px 8px;
+  font-size: 12px;
+  background: #0d1b33;
+  border: 1px solid #2a3a5c;
+  border-radius: 4px;
+  color: #e0e0e0;
+  outline: none;
+}
+
+.custom-pattern-input input[type="text"]::placeholder {
+  color: #555;
+}
+
+.custom-pattern-input input[type="text"]:focus {
+  border-color: #3a5a8c;
+}
+
+.custom-pattern-input button {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #0f3460;
+  color: #b8d0f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.custom-pattern-input button:hover {
+  background: #164080;
+}
+
+/* --- Recent closures section --- */
+
+.recent-closures-section {
+  padding: 10px;
+  background: #16213e;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+#recentClosuresList {
+  list-style: none;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+#recentClosuresList li {
+  padding: 4px 0;
+  font-size: 11px;
+  color: #8a94a8;
+  border-bottom: 1px solid #1a2744;
+}
+
+#recentClosuresList li:last-child {
+  border-bottom: none;
+}
+
+#recentClosuresList li .closure-time {
+  color: #555;
+  margin-right: 6px;
+}
+
+#recentClosuresList li .closure-link {
+  color: #7a9ec9;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+#recentClosuresList li .closure-link:hover {
+  color: #a8ccee;
+  text-decoration: underline;
+}
+
+#recentClosuresList li .closure-reason {
+  color: #665;
+  font-style: italic;
+}
+
+#recentClosuresList li.empty-state {
+  color: #555;
+  text-align: center;
+  padding: 8px 0;
+  border-bottom: none;
+}
+
+/* --- Footer --- */
+
+.footer {
+  font-size: 11px;
+  color: #555;
+  text-align: center;
+}

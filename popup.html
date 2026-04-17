@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Tab Reaper</h1>
+    <p class="subtitle">Auto-close leftover tabs</p>
+
+    <div class="patterns">
+      <label class="pattern-row">
+        <input type="checkbox" id="oauthCallback">
+        <span class="toggle"></span>
+        <span class="pattern-label">OAuth callbacks <code>127.0.0.1/oauth/callback</code></span>
+      </label>
+
+      <label class="pattern-row">
+        <input type="checkbox" id="slackRedirect">
+        <span class="toggle"></span>
+        <span class="pattern-label">Slack app redirects</span>
+      </label>
+
+      <label class="pattern-row">
+        <input type="checkbox" id="zoomLauncher">
+        <span class="toggle"></span>
+        <span class="pattern-label">Zoom meeting launchers</span>
+      </label>
+    </div>
+
+    <div class="delay-section">
+      <label for="delayMs">Close delay</label>
+      <div class="delay-control">
+        <input type="range" id="delayMs" min="500" max="5000" step="250">
+        <span id="delayValue">2.0s</span>
+      </div>
+    </div>
+
+    <div class="custom-patterns-section">
+      <h2>Custom patterns</h2>
+      <p class="section-hint">Substring match against tab URLs</p>
+      <ul id="customPatternList"></ul>
+      <div class="custom-pattern-input">
+        <input type="text" id="customPatternText" placeholder="e.g. pagerduty.slack.com/client">
+        <button id="addPatternBtn">Add</button>
+      </div>
+    </div>
+
+    <div class="recent-closures-section">
+      <h2>Recently closed</h2>
+      <ul id="recentClosuresList">
+        <li class="empty-state">No tabs closed yet.</li>
+      </ul>
+    </div>
+
+    <p class="footer">Tabs matching active patterns are closed after the configured delay.</p>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

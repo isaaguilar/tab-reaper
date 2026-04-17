@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Tab Reaper",
+  "version": "1.0.0",
+  "description": "Automatically closes leftover browser tabs from OAuth callbacks, Slack redirects, and Zoom launchers.",
+  "permissions": [
+    "tabs",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "icon128.svg"
+    }
+  },
+  "icons": {
+    "128": "icon128.svg"
+  }
+}
