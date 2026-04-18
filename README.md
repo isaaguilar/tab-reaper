@@ -6,7 +6,7 @@ Many tools open a browser tab as part of their flow and then leave a useless tab
 
 ## How it works
 
-You define URL substring patterns and Tab Reaper matches them against tab URL changes on sites you approve. When you add a pattern, the extension asks for access only to that pattern's site instead of requesting broad host access up front.
+You define URL substring patterns and Tab Reaper matches them against tab URL changes. Localhost callback tabs on `localhost` and `127.0.0.1` are covered by built-in host access, and when you add a pattern for any other site, the extension asks for access only to that site's tabs instead of requesting broad host access up front.
 
 For example, adding `app.slack.com/client` lets Tab Reaper request access to Slack tabs and close Slack redirect tabs. Adding `zoom.us/j/` lets it request access to Zoom tabs and close Zoom launcher tabs.
 
@@ -33,7 +33,8 @@ The close delay is configurable from 0.5 to 5 seconds (default 2 seconds) to giv
 - **tabs** - Required to read tab URLs and close tabs.
 - **storage** - Required to persist pattern list and delay across sessions via `chrome.storage.sync`.
 - **permissions** - Required to request site access at runtime when the user adds a pattern.
-- **optional_host_permissions** - Declared for `http://*/*` and `https://*/*` so the extension can request access only to sites the user explicitly approves.
+- **host_permissions** - Pre-granted for `localhost` and `127.0.0.1` so local callback tabs can be matched without an extra prompt.
+- **optional_host_permissions** - Declared for `http://*/*` and `https://*/*` so the extension can request access only to non-local sites the user explicitly approves.
 
 ## Privacy
 

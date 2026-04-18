@@ -4,7 +4,7 @@ Tab Reaper is a Chrome extension that automatically closes leftover browser tabs
 
 ## What Tab Reaper accesses
 
-Tab Reaper reads tab URLs only on sites the user explicitly approves when adding a pattern so it can detect tabs that match its configured auto-close patterns.
+Tab Reaper reads tab URLs on `localhost` and `127.0.0.1`, plus any additional sites the user explicitly approves when adding a pattern, so it can detect tabs that match its configured auto-close patterns.
 
 Tab Reaper stores extension settings in `chrome.storage.sync`, including which built-in patterns are enabled, the configured close delay, and any custom substring patterns you add.
 
