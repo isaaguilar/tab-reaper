@@ -114,7 +114,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   // Check user-defined substring patterns.
   const customs = currentState.customPatterns || [];
   for (const entry of customs) {
-    if (url.includes(entry.match)) {
+    if (matchesPattern(url, entry.match)) {
       scheduleClose(tabId, currentState.delayMs, entry.match, url);
       return;
     }
@@ -145,6 +145,16 @@ function normalizePatterns(patterns) {
       };
     })
     .filter(Boolean);
+}
+
+function matchesPattern(url, pattern) {
+  if (!pattern.includes("*")) {
+    return url.includes(pattern);
+  }
+  const regex = new RegExp(
+    pattern.split("*").map(s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join(".*")
+  );
+  return regex.test(url);
 }
 
 function scheduleClose(tabId, delayMs, reason, url) {

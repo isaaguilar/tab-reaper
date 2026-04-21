@@ -258,8 +258,11 @@ function buildPatternEntry(value) {
 
 function deriveOrigins(value) {
   if (value.startsWith("http://") || value.startsWith("https://")) {
+    // Replace :* with a real port so the URL parser accepts it, then
+    // derive origins from the parsed result.
+    const sanitized = value.replace(/:\*/, ":0");
     try {
-      const parsed = new URL(value);
+      const parsed = new URL(sanitized);
       if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
         return null;
       }
@@ -283,7 +286,7 @@ function isValidHost(host) {
     return false;
   }
 
-  const bareHost = host.replace(/:\d+$/, "");
+  const bareHost = host.replace(/:(\d+|\*)$/, "");
   if (bareHost === "localhost") {
     return true;
   }
@@ -302,14 +305,16 @@ function isValidHost(host) {
 function buildOriginPatterns(host, protocols) {
   const origins = [];
   const bareHost = host.replace(/:\d+$/, "");
+  const isLocal = bareHost === "localhost" ||
+    /^\d{1,3}(\.\d{1,3}){3}$/.test(bareHost);
+  const originHost = isLocal ? bareHost : host;
   const canUseWildcard = !bareHost.startsWith("*.") &&
-    bareHost !== "localhost" &&
-    !/^\d{1,3}(\.\d{1,3}){3}$/.test(bareHost) &&
+    !isLocal &&
     bareHost.includes(".") &&
     !host.includes(":");
 
   for (const protocol of protocols) {
-    origins.push(`${protocol}//${host}/*`);
+    origins.push(`${protocol}//${originHost}/*`);
     if (bareHost.startsWith("*.")) {
       origins.push(`${protocol}//${bareHost}/*`);
       continue;

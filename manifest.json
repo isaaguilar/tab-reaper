@@ -5,14 +5,7 @@
   "description": "Automatically closes leftover browser tabs matching user-defined URL patterns on sites you grant access to.",
   "permissions": [
     "tabs",
-    "storage",
-    "permissions"
-  ],
-  "host_permissions": [
-    "http://localhost/*",
-    "https://localhost/*",
-    "http://127.0.0.1/*",
-    "https://127.0.0.1/*"
+    "storage"
   ],
   "optional_host_permissions": [
     "http://*/*",
